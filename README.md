@@ -70,6 +70,8 @@ WEATHER_PROJECT/
 ├── requirements.txt
 └── README.md
 
+---
+
 ## 🧰 Requirements
 
 - Python 3.10+
@@ -77,6 +79,7 @@ WEATHER_PROJECT/
 - OpenWeather API Key
 - SMTP credentials for sending email
 
+---
 
 ## 🛠️ Installation Instructions
 
@@ -85,6 +88,9 @@ WEATHER_PROJECT/
 ```bash
 git clone <your-repo-url>
 cd WEATHER_PROJECT
+```
+
+---
 
 ## 🧪 Create Virtual Environment
 
@@ -94,6 +100,9 @@ cd WEATHER_PROJECT
 python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
+```
+
+---
 
 ### 🍎 macOS / 🐧 Linux
 
@@ -101,8 +110,9 @@ pip install -r requirements.txt
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+```
 
-
+---
 
 ## 🔐 Environment Setup (.env)
 
@@ -119,10 +129,12 @@ SMTP_PASSWORD=your_app_password
 FROM_EMAIL=your_email@gmail.com
 
 CITIES_FILE_PATH=./data/turkey_cities.json
+```
 
 ### ⚠️ Important (Gmail Users):
 Normal password will not work — you must create an App Password.
 
+---
 
 ## ▶️ Running the Application
 
@@ -130,7 +142,9 @@ Normal password will not work — you must create an App Password.
 
 ```bash
 python -m src.app
+```
 
+---
 
 ## 🧑‍💻 Running in VSCode
 1. Open the project folder in VSCode
@@ -141,7 +155,9 @@ python -m src.app
 
 ```bash
 python -m src.app
+```
 
+---
 
 ## 🧑‍💻 Running in PyCharm
 1. Open project in PyCharm
@@ -149,6 +165,7 @@ python -m src.app
 3. Select or create interpreter using ./venv
 4. Right-click src/app.py → Run 'app'
 
+---
 
 ## 📌 Application Flow
 
@@ -159,7 +176,9 @@ python -m src.app
 4. Weather data is saved to MongoDB
 5. A formatted daily weather report is generated
 6. The report is emailed to the user
+```
 
+---
 
 ## 📨 Example Email Output
 
@@ -175,7 +194,9 @@ Pressure: 1015 hPa
 Wind: 5.1 m/s – Direction: 220°
 ----------------------------------------
 Have a great day!
+```
 
+---
 
 ## 🧱 Architecture Overview
 
@@ -188,6 +209,7 @@ Have a great day!
 | EmailService      | Send email via SMTP                      |
 | Logger            | Centralized logging system               |
 
+---
 
 ## 🧩 System Architecture Diagram
 ```text
@@ -207,7 +229,9 @@ Have a great day!
            │
            ▼
      EmailService ───→ SMTP Server
+```
 
+---
 
 ## 🪵 Logging
 
@@ -215,12 +239,14 @@ Have a great day!
 
 ```bash
 logs/app.log
+```
 
 ### Log features:
 1. INFO level operational logs
 2. ERROR logs for failures
 3. Rotating logs to prevent oversized files
 
+---
 
 ## 🧪 Testing
 
@@ -228,6 +254,7 @@ logs/app.log
 
 ```bash
 pytest -v
+```
 
 ### Included Tests
 
@@ -238,6 +265,7 @@ pytest -v
 |test_report_service.py	       |Checks formatted report output       |
 |test_email_service.py	       |Mocks SMTP & verifies message sending|
 
+---
 
 ## 🐞 Troubleshooting 
 
@@ -255,11 +283,15 @@ pytest -v
 - Ensure SMTP settings are correct
 - Port must be 587
 
+---
+
 ## ⚠️ Known Issues
 
 - Some city names with Turkish characters may require ASCII variants for API queries
 - Rate limiting may apply if OpenWeather free tier is used
 - SMTP restrictions may vary by email provider
+
+---
 
 ## ⭐ Final Notes
 
@@ -274,5 +306,7 @@ Perfect for:
 - Portfolio showcase
 - Practicing APIs, databases, and Python OOP
 
-📄 License
+---
+
+## 📄 License
 Released under the MIT License — free for personal and educational use.
