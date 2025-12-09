@@ -69,10 +69,11 @@ WEATHER_PROJECT/
 ├── .env
 ├── requirements.txt
 └── README.md
+```
 
 ---
 
-## 🧰 Requirements
+## 📦 Requirements
 
 - Python 3.10+
 - MongoDB (local or MongoDB Atlas)
@@ -81,9 +82,55 @@ WEATHER_PROJECT/
 
 ---
 
+## 🌤️ How to Obtain an OpenWeather API Key
+
+1. Create a free account at → https://home.openweathermap.org
+2. Go to API Keys
+3. Click Create Key
+4. Copy the generated API key
+5. Paste it into .env as:
+```env
+OPENWEATHER_API_KEY=your_api_key_here
+```
+### 📌 Note: It may take 10–20 minutes for a new key to become active.
+
+---
+
+## 🍃 How to Install MongoDB
+
+### ✔ Option A: Local MongoDB (Recommended)
+1. Download MongoDB Community Edition:
+https://www.mongodb.com/try/download/community
+2. Choose Complete Installation
+3. Start service:
+```bash
+net start MongoDB
+```
+MongoDB runs automatically on:
+*mongodb://localhost:27017*
+
+---
+
+### ✔ Option B: MongoDB Atlas (Cloud)
+
+1. Create an Atlas account
+2. Create a free cluster
+3. Add a database user
+4. Whitelist your IP (0.0.0.0/0 for all)
+5. Copy connection string:
+```perl
+mongodb+srv://username:password@cluster.mongodb.net/
+```
+Add it to *.env*:
+```env
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/
+```
+
+---
+
 ## 🛠️ Installation Instructions
 
-### 1️⃣ Clone the Project
+### 🧰 Clone the Project
 
 ```bash
 git clone <your-repo-url>
