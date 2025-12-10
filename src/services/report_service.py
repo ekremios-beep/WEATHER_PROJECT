@@ -12,14 +12,6 @@ from ..utils.logger import get_logger
 LOGGER = get_logger()
 
 
-def _safe_get(data: Dict[str, Any], key: str, default: str = "?") -> Any:
-    """Safely extract values from nested dictionaries."""
-    value = data.get(key, default)
-    if value == default:
-        LOGGER.warning("Missing expected field '%s' in weather API data.", key)
-    return value
-
-
 def _sanitize_text(text: str) -> str:
     """Sanitize text to avoid newline injection or malformed output."""
     return text.replace("\n", " ").replace("\r", " ").strip()
@@ -29,53 +21,68 @@ class ReportService:
     """Generates plain-text weather reports."""
 
     @staticmethod
+    def _validate_required_fields(data: Dict[str, Any]) -> None:
+        """Validate presence of all required fields, otherwise raise KeyError."""
+
+        # Validate main block
+        required_main = ["temp", "feels_like", "temp_min", "temp_max", "humidity", "pressure"]
+
+        if "main" not in data:
+            raise KeyError("Missing 'main' section")
+
+        for key in required_main:
+            if key not in data["main"]:
+                LOGGER.warning("Missing expected field '%s' in weather API data.", key)
+                raise KeyError(f"Missing field '{key}' in main")
+
+        # Validate wind block
+        if "wind" not in data:
+            raise KeyError("Missing 'wind' section")
+
+        if "speed" not in data["wind"] or "deg" not in data["wind"]:
+            raise KeyError("Missing wind fields")
+
+        # Validate weather list
+        weather_list = data.get("weather")
+        if not isinstance(weather_list, list) or len(weather_list) == 0:
+            raise KeyError("Missing 'weather' section")
+
+        if not isinstance(weather_list[0], dict):
+            raise KeyError("Malformed weather entry")
+
+    @staticmethod
     def build_daily_report(city_name: str, data: Dict[str, Any]) -> str:
         """Build a robust daily weather report for the given city."""
+
+        # 🔥 TEST BUNU BEKLİYOR → EKSİK ALAN VARSA HEMEN KEYERROR
+        ReportService._validate_required_fields(data)
+
         now_str = datetime.now().strftime("%d.%m.%Y %H:%M")
 
-        # Basic groups
-        main = data.get("main", {})
-        wind = data.get("wind", {})
-        weather_list = data.get("weather", [])
+        main = data["main"]
+        wind = data["wind"]
+        weather_list = data["weather"]
 
-        # Weather description
-        description = "Bilinmiyor"
-        if isinstance(weather_list, list) and weather_list:
-            first = weather_list[0]
-            if isinstance(first, dict):
-                description = first.get("description", "Bilinmiyor")
-            else:
-                LOGGER.warning("Weather list entry is not a dict: %r", first)
-        else:
-            LOGGER.warning("Weather list missing or invalid.")
-
-        description = _sanitize_text(str(description))
-
-        # Safe extraction of fields
-        temp = _safe_get(main, "temp")
-        feels_like = _safe_get(main, "feels_like")
-        temp_min = _safe_get(main, "temp_min")
-        temp_max = _safe_get(main, "temp_max")
-        humidity = _safe_get(main, "humidity")
-        pressure = _safe_get(main, "pressure")
-        wind_speed = _safe_get(wind, "speed")
-        wind_deg = _safe_get(wind, "deg")
+        # Safe description
+        description = _sanitize_text(weather_list[0].get("description", "Unknown"))
 
         city_clean = _sanitize_text(city_name)
 
         lines = [
             f"WEATHER REPORT (Daily) - {now_str}",
             "-" * 40,
-            f"Province: {city_clean}",
+            f"City: {city_clean}",
             f"Condition: {description}",
-            f"Temperature: {temp}°C (Hissedilen: {feels_like}°C)",
-            f"Minimum / Maximum: {temp_min}°C / {temp_max}°C",
-            f"Humidity: {humidity}%",
-            f"Pressure: {pressure} hPa",
-            f"Wind Speed: {wind_speed} m/s, Yön: {wind_deg}°",
+            f"Temperature: {main['temp']}°C",
+            f"Feels Like: {main['feels_like']}°C",
+            f"Minimum / Maximum: {main['temp_min']}°C / {main['temp_max']}°C",
+            f"Humidity: {main['humidity']}%",
+            f"Pressure: {main['pressure']} hPa",
+            f"Wind Speed: {wind['speed']} m/s, Yön: {wind['deg']}°",
             "-" * 40,
             "We wish you a good day.",
         ]
+
 
         LOGGER.info("Daily weather report built for city '%s'.", city_clean)
 

@@ -25,6 +25,9 @@ class DatabaseService:
     """MongoDB wrapper for saving weather reports."""
 
     def __init__(self) -> None:
+        # 🔥 Testlerde monkeypatch edilen env değerlerini okuyabilmek için şart!
+        get_settings.cache_clear()
+
         self._settings = get_settings()
         mongo_uri = sanitize_mongo_uri(self._settings.mongo_uri)
 
@@ -63,14 +66,15 @@ class DatabaseService:
         try:
             self._collection.insert_one(document)
             LOGGER.info("Weather report saved for city %s", city_name)
+
         except errors.AutoReconnect as exc:
-            # Retry once if Mongo temporarily drops connection
             LOGGER.warning("MongoDB AutoReconnect: retrying insert... %s", exc)
             try:
                 self._collection.insert_one(document)
             except errors.PyMongoError as exc2:
                 LOGGER.error("Retry failed while inserting weather report: %s", exc2)
                 raise DatabaseError("Database insert retry failed.") from exc2
+
         except errors.PyMongoError as exc:
             LOGGER.error("Failed to insert weather report: %s", exc)
             raise DatabaseError("Failed to insert weather report.") from exc

@@ -15,7 +15,7 @@ from ..utils.logger import get_logger
 
 LOGGER = get_logger()
 
-# Stronger RFC 5322–inspired email pattern (still safe & practical)
+# Stronger RFC 5322–inspired email pattern
 EMAIL_REGEX = re.compile(
     r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
 )
@@ -61,16 +61,11 @@ class EmailService:
         return msg
 
     def send_report(self, to_email: str, subject: str, body: str) -> None:
-        """Send a plain-text email with improved safety and logging.
-
-        Raises:
-            EmailSendError: If sending fails for any reason.
-        """
+        """Send a plain-text email with improved safety and logging."""
         self._validate_email(to_email)
         msg = self._build_message(to_email, subject, body)
 
         try:
-            # Added timeout for safety
             with smtplib.SMTP(
                 self._settings.smtp_host,
                 self._settings.smtp_port,
@@ -78,6 +73,7 @@ class EmailService:
             ) as server:
                 server.ehlo()
 
+                # TLS protection
                 try:
                     server.starttls()
                     server.ehlo()
@@ -85,13 +81,22 @@ class EmailService:
                     LOGGER.error("TLS negotiation failed: %s", exc)
                     raise EmailSendError("TLS negotiation failed.") from exc
 
+                # Login
                 try:
                     server.login(self._settings.smtp_user, self._settings.smtp_password)
                 except smtplib.SMTPAuthenticationError as exc:
                     LOGGER.error("SMTP authentication failed: %s", exc)
                     raise EmailSendError("Invalid SMTP credentials.") from exc
 
-                server.send_message(msg)
+                try:
+                    server.sendmail(
+                        self._settings.from_email,
+                        to_email,
+                        msg.as_string()
+                    )
+                except Exception as exc:
+                    LOGGER.error("sendmail() failed: %s", exc)
+                    raise EmailSendError("Failed to send email.") from exc
 
         except (smtplib.SMTPConnectError, smtplib.SMTPServerDisconnected) as exc:
             LOGGER.error("SMTP connection error: %s", exc)

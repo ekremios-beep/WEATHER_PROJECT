@@ -19,10 +19,8 @@ LOGGER = get_logger()
 def sanitize_query(query: str) -> str:
     """Remove dangerous or invalid characters from city query, but keep comma."""
     cleaned = query.replace("\n", "").replace("\r", "").strip()
-    # VIRGÜLÜ SİLME!
     cleaned = "".join(ch for ch in cleaned if ch.isalnum() or ch in {" ", "-", "_", ","})
     return cleaned
-
 
 
 class WeatherService:
@@ -57,15 +55,16 @@ class WeatherService:
                         "Weather API returned HTTP %s on attempt %d. Body: %s",
                         response.status_code,
                         attempt,
-                        response.text[:200],  # avoid dumping large content
+                        response.text[:200],
                     )
 
                     if 400 <= response.status_code < 500:
                         raise WeatherApiError(
-                            f"Weather API client error: HTTP {response.status_code}",
+                            f"Weather API client error: HTTP {response.status_code}"
                         )
+
                     raise WeatherApiError(
-                        f"Weather API server error: HTTP {response.status_code}",
+                        f"Weather API server error: HTTP {response.status_code}"
                     )
 
                 try:
@@ -88,23 +87,19 @@ class WeatherService:
                 LOGGER.info("Successfully fetched weather for %s", safe_query)
                 return data
 
-            except (requests.RequestException, WeatherApiError) as exc:
+            except Exception as exc:
                 last_exception = exc
+
                 LOGGER.warning(
                     "Attempt %d/%d to fetch weather failed: %s",
-                    attempt,
-                    self._max_retries,
-                    exc,
+                    attempt, self._max_retries, exc
                 )
 
                 if attempt < self._max_retries:
-                    delay = self._retry_delay * (2 ** (attempt - 1))  # exponential backoff
+                    delay = self._retry_delay * (2 ** (attempt - 1))
                     time.sleep(delay)
 
-        # All attempts failed
-        if last_exception is None:
-            raise WeatherApiError("Weather API request failed for unknown reasons.")
-
+        # All attempts exhausted
         raise WeatherApiError(
-            f"Weather API request failed after {self._max_retries} attempts: {last_exception}",
+            f"Weather API request failed after {self._max_retries} attempts: {last_exception}"
         ) from last_exception

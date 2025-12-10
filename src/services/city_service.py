@@ -18,7 +18,6 @@ LOGGER = get_logger()
 @dataclass(frozen=True)
 class City:
     """Represents a city entry."""
-
     id: int
     name: str
     query: str
@@ -28,13 +27,15 @@ class CityService:
     """Service class for loading and selecting Turkish cities."""
 
     def __init__(self) -> None:
+        
+        get_settings.cache_clear()
+
         self._settings = get_settings()
         self._cities: List[City] = []
         self._load_cities()
 
     @property
     def cities(self) -> List[City]:
-        """Return list of available cities."""
         return self._cities
 
     def _load_cities(self) -> None:
@@ -44,46 +45,44 @@ class CityService:
         else:
             path = Path("data") / "turkey_cities.json"
 
+        if not path.exists():
+            LOGGER.error("City file not found at %s", path)
+            raise FileNotFoundError(f"Cities file not found: {path}")
+
         try:
             with path.open("r", encoding="utf-8") as file:
                 data = json.load(file)
+
             self._cities = [
                 City(id=item["id"], name=item["name"], query=item["query"])
                 for item in data
             ]
+
             LOGGER.info("Loaded %d cities from %s", len(self._cities), path)
-        except FileNotFoundError:
-            LOGGER.error("City file not found at %s", path)
-            raise
-        except (KeyError, TypeError, json.JSONDecodeError) as exc:
-            LOGGER.error("Failed to parse city file %s: %s", path, exc)
-            raise
+
+        except json.JSONDecodeError as exc:
+            LOGGER.error("Invalid JSON in city file %s: %s", path, exc)
+            raise Exception("Invalid JSON in cities file.") from exc
+
+        except (KeyError, TypeError) as exc:
+            LOGGER.error("Malformed city file structure %s: %s", path, exc)
+            raise Exception("Malformed city JSON structure.") from exc
 
     def get_city_by_id(self, city_id: int) -> Optional[City]:
-        """Return a city by its ID, or None if not found."""
         return next((c for c in self._cities if c.id == city_id), None)
 
-    # Kullanıcı etkileşimli seçim
     def prompt_user_for_city(self) -> City:
-        """Interactively ask user to select a city from the list.
-
-        This method is robust against invalid inputs and will loop
-        until a valid city ID is provided or the user cancels.
-        """
         print("=== Türkiye İlleri Hava Raporu ===")
         for city in self._cities:
             print(f"{city.id:2d} - {city.name}")
 
         while True:
             try:
-                raw = input(
-                    "Please enter the city ID (or 'q' to quit): ",
-                ).strip()
+                raw = input("Please enter the city ID (or 'q' to quit): ").strip()
             except (EOFError, KeyboardInterrupt) as exc:
                 print("\nInput cancelled by user.")
                 LOGGER.warning("User cancelled input while selecting city.")
                 raise SystemExit(1) from exc
-
 
             if raw.lower() in {"q", "quit", "exit"}:
                 print("Exiting application.")
