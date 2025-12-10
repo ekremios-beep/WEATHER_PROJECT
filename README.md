@@ -128,6 +128,25 @@ MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/
 
 ---
 
+## 📌 Development Requirements
+
+Development dependencies are tools used only during development, such as testing and linting.
+They are separated from production packages for cleaner, faster, and more secure deployments.
+
+```csharp
+requirements.txt          dev-requirements.txt
+──────────────────        ─────────────────────
+✔ Runtime packages        ✔ Development tools
+✔ Needed by the app       ✔ Not required in production
+```
+
+|Tool|           |Purpose               |
+|----------------|----------------------|
+|pytest 	 |Run unit tests        |
+|pylint 	 |Code quality & linting|
+
+---
+
 ## 🛠️ Installation Instructions
 
 ### 🧰 Clone the Project
@@ -147,6 +166,7 @@ cd WEATHER_PROJECT
 python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
+pip install -r dev-requirements.txt
 ```
 
 ---
@@ -157,6 +177,8 @@ pip install -r requirements.txt
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+pip install -r dev-requirements.txt
+
 ```
 
 ---
