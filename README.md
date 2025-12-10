@@ -140,7 +140,7 @@ requirements.txt          dev-requirements.txt
 ✔ Needed by the app       ✔ Not required in production
 ```
 
-|Tool|           |Purpose               |
+|Tool            |Purpose               |
 |----------------|----------------------|
 |pytest 	 |Run unit tests        |
 |pylint 	 |Code quality & linting|
