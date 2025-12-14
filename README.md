@@ -67,6 +67,9 @@ WEATHER_PROJECT/
 │   ├── test_email_service.py
 │
 ├── .env
+├── .gitignore
+├── dev-requirements.txt
+├── pytest.ini
 ├── requirements.txt
 └── README.md
 ```
